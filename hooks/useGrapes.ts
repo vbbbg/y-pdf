@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import grapesjs, { Editor } from "grapesjs";
+import receiptPlugin, { initReceiptLayout } from "../plugins/receipt-plugin";
 
 export function useGrapes() {
   const editorRef = useRef<Editor>(null);
@@ -11,18 +12,13 @@ export function useGrapes() {
       // Get the content for the canvas directly from the element
       // As an alternative we could use: `components: '<h1>Hello World Component!</h1>'`,
       fromElement: true,
-      // Size of the editor
-      height: "300px",
-      width: "auto",
       // Disable the storage manager for the moment
       storageManager: false,
       // Avoid any default panel
       panels: { defaults: [] },
+      plugins: [receiptPlugin],
     });
 
-    // Append components directly to the canvas
-    editorRef.current.addComponents(
-      `<div><img src="https://path/image" /><span title="foo">Hello world!!!</span></div>`,
-    );
+    initReceiptLayout(editorRef.current);
   }, []);
 }

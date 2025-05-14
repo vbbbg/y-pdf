@@ -8,9 +8,7 @@ export default function Home() {
 
   return (
     <div className="w-[90%] m-auto">
-      <div id="gjs">
-        <h1>Hello World Component!</h1>
-      </div>
+      <div id="gjs"></div>
     </div>
   );
 }
