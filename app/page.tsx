@@ -7,7 +7,7 @@ export default function Home() {
   useGrapes();
 
   return (
-    <div className="w-[90%] m-auto">
+    <div className="w-[100%] m-auto">
       <div id="gjs"></div>
     </div>
   );
