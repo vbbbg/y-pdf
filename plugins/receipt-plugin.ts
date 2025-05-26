@@ -60,6 +60,8 @@ const typeDefine: Plugin = (editor) => {
     model: {
       defaults: {
         name: "全幅纸张",
+        droppable: false,
+        draggable: false,
       },
     },
   });
@@ -74,6 +76,8 @@ const typeDefine: Plugin = (editor) => {
         attributes: { "data-gjs-type": ComponentType.HEADER },
         style: { width: "100%" },
         resizable,
+        draggable: false,
+        droppable: false,
         traits,
         toolbar: [], // 禁用 toolbar
       },
@@ -91,6 +95,8 @@ const typeDefine: Plugin = (editor) => {
         style: { width: "100%" },
         resizable,
         traits,
+        draggable: false,
+        droppable: true,
         toolbar: [], // 禁用 toolbar
       },
     },
@@ -107,6 +113,8 @@ const typeDefine: Plugin = (editor) => {
         style: { width: "100%" },
         resizable,
         traits,
+        draggable: false,
+        droppable: false,
         toolbar: [], // 禁用 toolbar
       },
     },
@@ -123,6 +131,8 @@ const typeDefine: Plugin = (editor) => {
         style: { width: "100%" },
         resizable,
         traits,
+        draggable: false,
+        droppable: false,
         toolbar: [], // 禁用 toolbar
       },
     },
@@ -144,7 +154,7 @@ const addBlock: Plugin = (editor) => {
     category: "PDF 布局",
     content: {
       type: ComponentType.TABLE,
-      content: `<div class="table-section" style=" width: 100%;">表格区域</div>`,
+      content: `<div class="table-section" style="width: 100%;">表格区域</div>`,
     },
   });
 
@@ -153,7 +163,7 @@ const addBlock: Plugin = (editor) => {
     category: "PDF 布局",
     content: {
       type: ComponentType.SUMMARY,
-      content: `<div class="table-summary" style=" width: 100%;">表格合计区域</div>`,
+      content: `<div class="table-summary" style="width: 100%;">表格合计区域</div>`,
     },
   });
 
@@ -162,7 +172,7 @@ const addBlock: Plugin = (editor) => {
     category: "PDF 布局",
     content: {
       type: ComponentType.FOOTER,
-      content: `<div class="footer-section" style=" width: 100%;">表尾区域</div>`,
+      content: `<div class="footer-section" style="width: 100%;">表尾区域</div>`,
     },
   });
 };
@@ -232,36 +242,18 @@ const receiptPlugin: Plugin = (editor, config) => {
   addEvents(editor, config);
 };
 
-const addComponentToEditor = (
-  editor: Editor,
-  type: Exclude<ComponentType, ComponentType.Paper>,
-) => {
-  const config = componentMap[type];
-  if (!config) {
-    console.warn(`未找到组件类型: ${type}`);
-    return;
-  }
-
-  editor.addComponents(
-    `<div data-gjs-type="${type}" style="${config.style}"></div>`,
-  );
-};
-
 const initReceiptLayout = (editor: Editor) => {
-  // 添加 paper 组件，宽高铺满
-  const paper = editor.addComponents({
-    type: ComponentType.Paper,
-    style: {
-      width: "100%",
-      height: "100%",
-      position: "relative",
-      overflow: "hidden",
-    },
-    attributes: { "data-gjs-type": ComponentType.Paper },
+  const wrapper = editor.getWrapper();
+  if (!wrapper) return;
+
+  wrapper.setStyle({
+    width: "100%",
+    height: "100%",
+    position: "relative",
+    overflow: "hidden",
   });
 
-  // 获取添加的 paper 组件
-  const paperComponent = Array.isArray(paper) ? paper[0] : paper;
+  wrapper.setName("全幅纸张");
 
   // 添加各个区域组件到 paper 中
   [
@@ -275,13 +267,13 @@ const initReceiptLayout = (editor: Editor) => {
     );
     // 将组件添加到 paper 中
     if (Array.isArray(component)) {
-      paperComponent.append(component[0]);
+      wrapper.append(component[0]);
     } else {
-      paperComponent.append(component);
+      wrapper.append(component);
     }
   });
 };
 
-export { initReceiptLayout, addComponentToEditor };
+export { initReceiptLayout };
 
 export default receiptPlugin;
