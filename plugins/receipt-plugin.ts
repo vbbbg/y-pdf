@@ -1,4 +1,10 @@
-import type { CssRuleStyle, Editor, Plugin } from "grapesjs";
+import { Component, Editor, Plugin } from "grapesjs";
+import {
+  mmToPx,
+  PaperConfig,
+  paperConfigs,
+  PaperType,
+} from "@/plugins/paper-type";
 
 enum ComponentType {
   Paper = "full-paper",
@@ -161,12 +167,69 @@ const addBlock: Plugin = (editor) => {
   });
 };
 
+const addEvents: Plugin = (editor) => {
+  const metaData: { paperConfig?: PaperConfig } = {};
+
+  editor.on(
+    "component:resize",
+    (e: {
+      component: Component;
+      el: HTMLElement;
+      type: "start" | "move" | "end";
+    }) => {
+      switch (e.type) {
+        case "start":
+          const device = editor.Devices.getSelected();
+          if (!device) return;
+
+          const deviceId = device.attributes.id as unknown as PaperType;
+          const paperConfig = paperConfigs[deviceId];
+          metaData.paperConfig = paperConfig;
+          break;
+
+        case "end":
+          if (!metaData.paperConfig) return;
+          const maxHeight = mmToPx(metaData.paperConfig.mmHeight);
+
+          const componentHeight = e.component.getEl()?.clientHeight || 0;
+          const componentType = e.component.attributes.type;
+
+          const parent = e.component.parent();
+          if (!parent) return;
+
+          const totalHeightWithoutComponentHeight = parent
+            ?.components()
+            .reduce<number>((_totalHeight: number, com: Component) => {
+              if (com.attributes.type === componentType) {
+                return _totalHeight;
+              }
+
+              return _totalHeight + (com.getEl()?.clientHeight || 0);
+            }, 0);
+
+          if (totalHeightWithoutComponentHeight + componentHeight > maxHeight) {
+            e.component.setStyle({
+              height: `${maxHeight - totalHeightWithoutComponentHeight}px`,
+            });
+          }
+          break;
+
+        default:
+          break;
+      }
+    },
+  );
+};
+
 const receiptPlugin: Plugin = (editor, config) => {
   // 添加自定义组件类型
   typeDefine(editor, config);
 
   // 添加区块
   addBlock(editor, config);
+
+  // 添加事件
+  addEvents(editor, config);
 };
 
 const addComponentToEditor = (
